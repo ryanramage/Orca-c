@@ -230,14 +230,22 @@ BEGIN_OPERATOR(movement)
 END_OPERATOR
 
 BEGIN_OPERATOR(midicc)
-  for (Usz i = 1; i < 4; ++i) {
+  for (Usz i = 1; i < 6; ++i) {
     PORT(0, (Isz)i, IN);
   }
   STOP_IF_NOT_BANGED;
   Glyph channel_g = PEEK(0, 1);
-  Glyph control_g = PEEK(0, 2);
-  Glyph value_g = PEEK(0, 3);
-  if (channel_g == '.' || control_g == '.')
+  Glyph control_g0 = PEEK(0, 2);
+  Glyph control_g1 = PEEK(0, 3);
+  Glyph control_g2 = PEEK(0, 4);
+
+  char control_g[3] = "000";
+  control_g[0] = control_g0;
+  control_g[1] = control_g1;
+  control_g[2] = control_g2;
+
+  Glyph value_g = PEEK(0, 5);
+  if (channel_g == '.' || control_g0 == '.' || control_g1 == '.' || control_g2 == '.')
     return;
   Usz channel = index_of(channel_g);
   if (channel > 15)
@@ -246,7 +254,7 @@ BEGIN_OPERATOR(midicc)
       (Oevent_midi_cc *)oevent_list_alloc_item(extra_params->oevent_list);
   oe->oevent_type = Oevent_type_midi_cc;
   oe->channel = (U8)channel;
-  oe->control = (U8)index_of(control_g);
+  oe->control = (U8)atoi(control_g);
   oe->value = (U8)(index_of(value_g) * 127 / 35); // 0~35 -> 0~127
 END_OPERATOR
 
